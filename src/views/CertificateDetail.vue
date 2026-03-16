@@ -7,14 +7,14 @@
     <!-- 错误 -->
     <div v-else-if="error" class="error">
       {{ error }}
-      <button @click="loadCertificate">重试</button>
+      <button @click="retryLoad">重试</button>
     </div>
 
     <!-- 证书详情 -->
     <div v-else-if="cert" class="cert-detail">
       <!-- 标题区 -->
       <header class="cert-header">
-        <h1 class="cert-title">{{ cert.title }}</h1>
+        <h1 class="cert-title">{{ cert.name }}</h1>
         <div v-if="cert.keywords" class="cert-keywords">
           <span class="keyword" v-for="(kw, idx) in cert.keywords" :key="idx">
             {{ kw }}
@@ -29,7 +29,7 @@
           <img
             v-if="cert.imageUrl"
             :src="cert.imageUrl"
-            :alt="cert.title"
+            :alt="cert.name"
             class="cert-image"
           />
           <div v-else class="cert-image-placeholder">无证书图片</div>
@@ -115,7 +115,7 @@ async function loadCertificate(id: number) {
       ...detail,
       certifiedCompanies: companies.map(c => ({
         name: c.enterpriseName,
-        logo: c.imageUrl // 后端返回的是 imageUrl
+        logo: c.certificateImageUrl // 后端返回的是 imageUrl
       }))
     }
   } catch (err: any) {
@@ -127,6 +127,16 @@ async function loadCertificate(id: number) {
     }
   } finally {
     loading.value = false
+  }
+}
+
+// 👇 新增：用于模板中的重试按钮
+function retryLoad() {
+  const id = Number(route.params.id)
+  if (!isNaN(id)) {
+    loadCertificate(id)
+  } else {
+    error.value = '无效的证书ID'
   }
 }
 

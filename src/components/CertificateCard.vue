@@ -6,7 +6,7 @@
       <img
         v-if="cert.imageUrl"
         :src="cert.imageUrl"
-        :alt="cert.title"
+        :alt="cert.name"
         @error="handleImageError"
         loading="lazy"
       />
@@ -19,17 +19,17 @@
     <div class="cert-info">
       <h3>
         <a
-          :href="cert.detailUrl"
+          :href="cert.imageUrl"
           target="_blank"
           rel="noopener noreferrer"
         >
-          {{ cert.title }}
+          {{ cert.name }}
         </a>
       </h3>
       <div class="meta">
-        <span>{{ cert.category }}</span>
+        <span>{{ cert.contactPerson }}</span>
         <span>{{ cert.domain }}</span>
-        <span>{{ cert.publishDate }}</span>
+        <span>{{ cert.createdAt }}</span>
       </div>
     </div>
   </div>

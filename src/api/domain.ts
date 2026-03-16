@@ -1,12 +1,15 @@
+// src/api/domain.ts
 import api from './base'
 
+export interface Domain {
+  id: number
+  name: string
+}
+
 export const domainApi = {
-  // 获取所有领域
-  getAll(): Promise<string[]> {
+  getAll(): Promise<Domain[]> {
     return api.get('/domains').then(res => res.data)
   },
-
-  // 添加新领域
   add(name: string): Promise<void> {
     return api.post('/domains', { name }).then(() => {})
   }

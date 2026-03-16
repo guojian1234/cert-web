@@ -5,12 +5,13 @@ import type { Certificate, CertificateDetail } from '@/types/certificate'
 function toCertificate(item: any): Certificate {
   return {
     id: item.id,
-    title: item.name,
-    category: item.name,
-    domain: item.domain,
-    publishDate: item.createdAt,
-    detailUrl: `/certificate/detail/${item.id}`,
-    imageUrl: item.imageUrl || ''
+    name: item.name,
+    domain: item.domain,              // 👈 补全
+    createdAt: item.createdAt,      // 👈 补全
+    contactPerson:item.contactPerson,
+    reportSummary:item.reportSummary,
+    imageUrl: item.imageUrl, // 👈 补全
+
   }
 }
 
@@ -18,7 +19,10 @@ function toCertificate(item: any): Certificate {
 function toCertificateDetail(item: any): Omit<CertificateDetail, 'certifiedCompanies'> {
   return {
     id: item.id,
-    title: item.name,
+    name: item.name,
+    domain: item.domain,              
+    createdAt: item.createdAt,      
+    contactPerson:item.contactPerson,
     keywords: [item.domain],
     imageUrl: item.imageUrl || '',
     summary: item.reportSummary || '',
@@ -28,15 +32,11 @@ function toCertificateDetail(item: any): Omit<CertificateDetail, 'certifiedCompa
 
 export const categoryApi = {
   getAll(): Promise<Certificate[]> {
-    return api.get('/categories').then(res =>
-      (res.data as any[]).map(toCertificate)
-    )
+    return api.get('/categories').then(res => (res.data as any[]).map(toCertificate))
   },
 
   getById(id: number): Promise<Omit<CertificateDetail, 'certifiedCompanies'>> {
-    return api.get(`/categories/${id}`).then(res =>
-      toCertificateDetail(res.data)
-    )
+    return api.get(`/categories/${id}`).then(res => toCertificateDetail(res.data))
   },
 
   create(formData: FormData): Promise<void> {

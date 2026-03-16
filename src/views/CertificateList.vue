@@ -3,34 +3,27 @@
   <div class="container">
     <!-- 标题 + 领域筛选 -->
     <header class="page-header">
-
       <!-- 研究领域标签 -->
       <div class="domain-tabs">
         <!-- “研究领域” 可点击，用于重置筛选 -->
-        <button 
-          class="domain-btn domain-title"
-          @click="resetFilter"
-        >
+        <button class="domain-btn domain-title" @click="resetFilter">
           研究领域
         </button>
-
         <!-- 可点击的筛选按钮 -->
         <button
           v-for="domain in filterDomains"
-          :key="domain"
-          :class="{ active: activeDomain === domain }"
-          @click="filterByDomain(domain)"
+          :key="domain.name"
+          :class="{ active: activeDomain === domain.name }"
+          @click="filterByDomain(domain.name)"
           class="domain-btn"
         >
-          {{ domain }}
+          {{ domain.name }}
         </button>
       </div>
     </header>
 
     <!-- 加载中 -->
-    <div v-if="loading" class="loading">
-      正在加载证书列表...
-    </div>
+    <div v-if="loading" class="loading">正在加载证书列表...</div>
 
     <!-- 错误提示 -->
     <div v-else-if="error" class="error">
@@ -61,7 +54,6 @@
       >
         上一页
       </button>
-
       <span v-for="page in visiblePages" :key="page" class="page-item">
         <button
           v-if="page === '...'"
@@ -79,7 +71,6 @@
           {{ page }}
         </button>
       </span>
-
       <button
         :disabled="currentPage === totalPages"
         @click="goToPage(currentPage + 1)"
@@ -97,20 +88,20 @@ import type { Certificate } from '@/types/certificate'
 import CertificateCard from '@/components/CertificateCard.vue'
 import { domainApi } from '@/api/domain'
 import { categoryApi } from '@/api/category'
+import type { Domain } from '@/api/domain' // ✅ 导入 Domain 类型
 
-const filterDomains = ref<string[]>([])
+const filterDomains = ref<Domain[]>([]) // ✅ 类型是 Domain[]
 const allCertificates = ref<Certificate[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const currentPage = ref(1)
-const activeDomain = ref<string | null>(null)
-
+const activeDomain = ref<string | null>(null) // ✅ 存储字符串（如 "人工智能"）
 const pageSize = 5
 
 // 加载领域
 async function loadDomains() {
   try {
-    filterDomains.value = await domainApi.getAll()
+    filterDomains.value = await domainApi.getAll() // 返回 Domain[]
   } catch (err) {
     console.error('加载领域失败', err)
   }
@@ -146,14 +137,16 @@ const paginatedCertificates = computed(() => {
   return filteredCertificates.value.slice(start, start + pageSize)
 })
 
-const visiblePages = computed(() => {
+const visiblePages = computed<(number | string)[]>(() => {
   const total = totalPages.value
   const current = currentPage.value
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  if (total <= 7) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
   const delta = 2
   const left = Math.max(2, current - delta)
   const right = Math.min(total - 1, current + delta)
-  const range = [1]
+  const range: (number | string)[] = [1]
   if (left > 2) range.push('...')
   for (let i = left; i <= right; i++) range.push(i)
   if (right < total - 1) range.push('...')
@@ -162,8 +155,8 @@ const visiblePages = computed(() => {
 })
 
 // 方法
-function filterByDomain(domain: string) {
-  activeDomain.value = domain
+function filterByDomain(domainName: string) {
+  activeDomain.value = domainName
   currentPage.value = 1
 }
 

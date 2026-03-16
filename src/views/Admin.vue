@@ -1,4 +1,3 @@
-<!-- src/views/Admin.vue -->
 <template>
   <div class="admin-container">
     <header class="admin-header">
@@ -15,7 +14,7 @@
           <button @click="addDomain" class="action-btn">新增</button>
         </div>
         <div class="existing-domains">
-          <span v-for="domain in domains" :key="domain" class="domain-tag">{{ domain }}</span>
+          <span v-for="domain in domains" :key="domain.id" class="domain-tag">{{ domain.name }}</span>
         </div>
       </section>
 
@@ -33,50 +32,40 @@
             <label>所属研究领域 *</label>
             <select v-model="newCategoryForm.domain" required>
               <option value="" disabled>请选择</option>
-              <option v-for="d in domains" :key="d" :value="d">{{ d }}</option>
+              <option v-for="d in domains" :key="d.name" :value="d.name">{{ d.name }}</option>
             </select>
           </div>
           <div class="form-group">
             <label>创建时间 (YYYY-MM) *</label>
-            <input v-model="newCategoryForm.createdAt" type="month" required />
+            <div style="display: flex; gap: 8px;">
+              <select v-model="newCategoryForm.year" required style="flex: 1;">
+                <option value="">选择年份</option>
+                <option v-for="y in Array.from({length: 31}, (_, i) => 2000 + i)" :key="y" :value="y.toString()">{{ y }} 年</option>
+              </select>
+              <select v-model="newCategoryForm.month" required style="flex: 1;">
+                <option value="">选择月份</option>
+                <option v-for="m in 12" :key="m" :value="m.toString().padStart(2, '0')">{{ m }} 月</option>
+              </select>
+            </div>
           </div>
-          <!-- 👇 联系人：改为必填 -->
           <div class="form-group">
             <label>联系人 *</label>
-            <input 
-              v-model="newCategoryForm.contactPerson" 
-              type="text" 
-              required 
-              placeholder="请输入联系人姓名或职位"
-            />
+            <input v-model="newCategoryForm.contactPerson" type="text" required placeholder="请输入联系人姓名或职位"/>
           </div>
           <div class="form-group">
             <label>类别图标 (上传) *</label>
             <input type="file" accept="image/*" @change="handleCategoryImageUpload" />
-            <img v-if="newCategoryForm.imageUrl" :src="newCategoryForm.imageUrl" class="preview-image" />
+            <img v-if="newCategoryForm.previewUrl" :src="newCategoryForm.previewUrl" class="preview-image" />
           </div>
-
-          <!-- 报告摘要（仍为选填） -->
           <div class="form-group full-width">
             <label>报告摘要（选填）</label>
-            <textarea
-              v-model="newCategoryForm.reportSummary"
-              placeholder="请输入该证书类别的技术报告摘要，例如评估维度、核心能力要求等（最多500字）"
-              rows="4"
-            ></textarea>
+            <textarea v-model="newCategoryForm.reportSummary" placeholder="请输入该证书类别的技术报告摘要，例如评估维度、核心能力要求等（最多500字）" rows="4"></textarea>
           </div>
         </div>
         <button @click="addCategory" class="action-btn" style="margin-top: 16px;">+ 添加证书类别</button>
-
-        <!-- 展示已有类别 -->
         <div class="category-list" style="margin-top: 24px;">
           <div v-for="cat in categories" :key="cat.id" class="category-item">
-            <img 
-              :src="cat.imageUrl" 
-              class="category-icon" 
-              alt="类别图标"
-              @error="handleImageError"
-            />
+            <img :src="cat.imageUrl" class="category-icon" alt="类别图标" @error="handleImageError"/>
             <div>
               <strong>{{ cat.name }}</strong><br />
               <small>领域: {{ cat.domain }} | {{ cat.createdAt }}</small><br />
@@ -101,19 +90,26 @@
             <label>关联证书类别 *</label>
             <select v-model="newCertForm.categoryId" required>
               <option value="" disabled>请选择类别</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                {{ cat.name }}
-              </option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
           </div>
           <div class="form-group">
             <label>颁发时间 (YYYY-MM) *</label>
-            <input v-model="newCertForm.issuedAt" type="month" required />
+            <div style="display: flex; gap: 8px;">
+              <select v-model="newCertForm.year" required style="flex: 1;">
+                <option value="">选择年份</option>
+                <option v-for="y in Array.from({length: 31}, (_, i) => 2000 + i)" :key="y" :value="y.toString()">{{ y }} 年</option>
+              </select>
+              <select v-model="newCertForm.month" required style="flex: 1;">
+                <option value="">选择月份</option>
+                <option v-for="m in 12" :key="m" :value="m.toString().padStart(2, '0')">{{ m }} 月</option>
+              </select>
+            </div>
           </div>
           <div class="form-group">
             <label>企业证书图片 (上传) *</label>
             <input type="file" accept="image/*" @change="handleCertImageUpload" />
-            <img v-if="newCertForm.certificateImageUrl" :src="newCertForm.certificateImageUrl" class="preview-image" />
+            <img v-if="newCertForm.previewUrl" :src="newCertForm.previewUrl" class="preview-image" />
           </div>
         </div>
         <button @click="addEnterpriseCertificate" class="action-btn" style="margin-top: 16px;">+ 添加企业证书</button>
@@ -123,17 +119,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { domainApi } from '@/api/domain'
 import { categoryApi } from '@/api/category'
 import { enterpriseCertApi } from '@/api/enterpriseCert'
+import type { Certificate } from '@/types/certificate' 
+import type { Domain } from '@/api/domain'
 
 const router = useRouter()
 
 // --- 领域管理 ---
 const newDomain = ref('')
-const domains = ref<string[]>([])
+const domains = ref<Domain[]>([])
 
 async function loadDomains() {
   domains.value = await domainApi.getAll()
@@ -141,87 +139,116 @@ async function loadDomains() {
 
 async function addDomain() {
   const name = newDomain.value.trim()
-  if (name && !domains.value.includes(name)) {
+  if (!name) return // 空值直接退出
+
+  const isDuplicate = domains.value.some(domain => domain.name === name)
+  
+  if (!isDuplicate) {
     await domainApi.add(name)
     newDomain.value = ''
-    loadDomains()
+    await loadDomains() // 建议加 await 确保刷新
+  } else {
+    alert('该领域已存在')
   }
 }
 
 // --- 证书类别 ---
-const newCategoryForm = ref({
+const newCategoryForm = reactive({
   name: '',
   domain: '',
-  createdAt: '',
+  year: new Date().getFullYear().toString(),
+  month: '01',
   contactPerson: '',
   reportSummary: '',
   file: null as File | null,
-  previewUrl: '' as string | null
+  previewUrl: null as string | null,
 })
 
 function handleCategoryImageUpload(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) {
-    newCategoryForm.value.file = file
-    newCategoryForm.value.previewUrl = URL.createObjectURL(file)
+    newCategoryForm.file = file
+    newCategoryForm.previewUrl = URL.createObjectURL(file)
   }
 }
 
 async function addCategory() {
-  const { name, domain, createdAt, contactPerson, reportSummary, file } = newCategoryForm.value
-  if (!name || !domain || !createdAt || !contactPerson || !file) {
+  const { name, domain, year, month, contactPerson, reportSummary, file } = newCategoryForm
+
+  const safeTrim = (val: unknown): string => val == null ? '' : String(val).trim();
+
+  const n = safeTrim(name)
+  const d = safeTrim(domain)
+  const cp = safeTrim(contactPerson)
+
+  if (!n || !d || !year || !month || !cp || !(file instanceof File)) {
     alert('请填写所有必填项')
     return
   }
 
+  const createdAt = `${year}-${month}`
+
   const formData = new FormData()
-  formData.append('name', name.trim())
-  formData.append('domain', domain.trim())
+  formData.append('name', n)
+  formData.append('domain', d)
   formData.append('createdAt', createdAt)
-  formData.append('contactPerson', contactPerson.trim())
-  if (reportSummary) formData.append('reportSummary', reportSummary.trim())
+  formData.append('contactPerson', cp)
+  if (reportSummary != null) {
+    formData.append('reportSummary', safeTrim(reportSummary))
+  }
   formData.append('image', file)
 
   try {
     await categoryApi.create(formData)
-    Object.assign(newCategoryForm.value, {
-      name: '', domain: '', createdAt: '', contactPerson: '',
-      reportSummary: '', file: null, previewUrl: null
+    Object.assign(newCategoryForm, {
+      name: '',
+      domain: '',
+      year: new Date().getFullYear().toString(),
+      month: '01',
+      contactPerson: '',
+      reportSummary: '',
+      file: null,
+      previewUrl: null,
     })
   } catch (err) {
+    console.error('添加失败:', err)
     alert('添加失败')
   }
 }
 
 // --- 企业证书 ---
-const categories = ref<{ id: number; name: string }[]>([])
-const newCertForm = ref({
+const categories = ref<Certificate[]>([])
+
+const newCertForm = reactive({
   enterpriseName: '',
   categoryId: 0,
-  issuedAt: '',
+  year: new Date().getFullYear().toString(),
+  month: '01',
   file: null as File | null,
-  previewUrl: '' as string | null
+  previewUrl: null as string | null,
 })
 
 async function loadCategories() {
   const certs = await categoryApi.getAll()
-  categories.value = certs.map(c => ({ id: c.id, name: c.title }))
+  categories.value = certs
 }
 
 function handleCertImageUpload(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
   if (file) {
-    newCertForm.value.file = file
-    newCertForm.value.previewUrl = URL.createObjectURL(file)
+    newCertForm.file = file
+    newCertForm.previewUrl = URL.createObjectURL(file)
   }
 }
 
 async function addEnterpriseCertificate() {
-  const { enterpriseName, categoryId, issuedAt, file } = newCertForm.value
-  if (!enterpriseName || !categoryId || !issuedAt || !file) {
+  const { enterpriseName, categoryId, year, month, file } = newCertForm
+  if (!enterpriseName || !categoryId || !year || !month || !file) {
     alert('请填写所有必填项')
     return
   }
+
+  const issuedAt = `${year}-${month}`
 
   const formData = new FormData()
   formData.append('enterpriseName', enterpriseName.trim())
@@ -231,9 +258,13 @@ async function addEnterpriseCertificate() {
 
   try {
     await enterpriseCertApi.create(formData)
-    Object.assign(newCertForm.value, {
-      enterpriseName: '', categoryId: 0, issuedAt: '',
-      file: null, previewUrl: null
+    Object.assign(newCertForm, {
+      enterpriseName: '',
+      categoryId: 0,
+      year: new Date().getFullYear().toString(),
+      month: '01',
+      file: null,
+      previewUrl: null,
     })
   } catch (err) {
     alert('添加失败')
@@ -251,12 +282,16 @@ function handleImageError(e: Event) {
   const img = e.target as HTMLImageElement
   img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
 }
+
+// --- 登出功能 ---
+function logout() {
+  localStorage.removeItem('token')
+  router.push('/login')
+}
 </script>
 
 
-
 <style scoped>
-/* 样式保持不变，此处省略以节省篇幅，实际使用时保留原样式 */
 .admin-container {
   box-sizing: border-box;
   max-width: 900px;
