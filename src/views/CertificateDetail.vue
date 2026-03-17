@@ -1,89 +1,58 @@
-<!-- src/views/CertificateDetail.vue -->
 <template>
   <div class="cert-detail-container">
-    <!-- 加载中 -->
+    <div class="breadcrumb">
+      <router-link to="/">证书</router-link>
+      <span class="breadcrumb-separator"> &gt; </span>
+      <span class="breadcrumb-current">证书详情</span>
+    </div>
     <div v-if="loading" class="loading">正在加载证书详情...</div>
-
-    <!-- 错误 -->
     <div v-else-if="error" class="error">
       {{ error }}
       <button @click="retryLoad">重试</button>
     </div>
-
-    <!-- 证书详情 -->
     <div v-else-if="cert" class="cert-detail">
-      <!-- 标题区 -->
-      <header class="cert-header">
-        <h1 class="cert-title">{{ cert.name }}</h1>
-        <div v-if="cert.keywords" class="cert-keywords">
-          <span class="keyword" v-for="(kw, idx) in cert.keywords" :key="idx">
-            {{ kw }}
-          </span>
-        </div>
-      </header>
-
-      <!-- 主体内容：图片 + 摘要 + 企业 -->
+      <!-- 图片 + 标题/关键词/联系人（左右布局） -->
       <div class="cert-body">
         <!-- 左侧：证书图片 -->
         <div class="cert-image-wrapper">
-          <img
-            v-if="cert.imageUrl"
-            :src="cert.imageUrl"
-            :alt="cert.name"
-            class="cert-image"
-          />
+          <img v-if="cert.imageUrl" :src="cert.imageUrl" :alt="cert.name" class="cert-image" />
           <div v-else class="cert-image-placeholder">无证书图片</div>
         </div>
 
-        <!-- 右侧：摘要与联系人 -->
+        <!-- 右侧：标题 + 关键词 + 联系人 -->
         <div class="cert-info">
-          <!-- 摘要 -->
-          <section v-if="cert.summary" class="cert-section">
-            <h2>报告摘要</h2>
-            <p class="summary-text">{{ cert.summary }}</p>
-          </section>
-
-          <!-- 联系人 -->
-          <section v-if="cert.contact" class="cert-section">
-            <h2>联系人</h2>
+          <h1 class="cert-title">{{ cert.name }}</h1>
+          <div v-if="cert.keywords" class="cert-keywords">
+            <span class="keyword" v-for="(kw, idx) in cert.keywords" :key="idx">{{ kw }}</span>
+          </div>
+          <div v-if="cert.contact" class="cert-contact">
             <p>{{ cert.contact }}</p>
-          </section>
+          </div>
         </div>
       </div>
 
-<!-- 认证企业列表 -->
-<section v-if="cert.certifiedCompanies && cert.certifiedCompanies.length > 0" class="companies-section">
-  <h2>已获认证企业</h2>
-  <div class="companies-grid">
-    <!-- 每个企业卡片：证书图片 + 企业名称 -->
-    <div
-      v-for="(company, index) in cert.certifiedCompanies"
-      :key="index"
-      class="company-card"
-    >
-      <!-- 证书图片 -->
-      <div class="cert-image-wrapper">
-        <img
-          v-if="company.logo"
-          :src="company.logo"
-          :alt="company.name"
-          class="cert-image"
-        />
-        <div v-else class="cert-image-placeholder">无证书图片</div>
-      </div>
+      <!-- 报告摘要：全宽，位于 cert-body 下方 -->
+      <section v-if="cert.summary" class="summary-section full-width-section">
+        <h2>报告摘要</h2>
+        <div class="summary-content">{{ cert.summary }}</div>
+      </section>
 
-      <!-- 企业名称（在图片下方） -->
-      <div class="company-name-display">
-        <p class="company-name-text">{{ company.name }}</p>
-      </div>
-    </div>
-  </div>
-</section>
-    </div>
+      <!-- 已获认证企业（保持不变） -->
+      <section v-if="cert.certifiedCompanies && cert.certifiedCompanies.length > 0" class="companies-section">
+        <h2>已获认证企业</h2>
+        <div class="companies-grid">
+          <div v-for="(company, index) in cert.certifiedCompanies" :key="index" class="company-card">
+            <div class="cert-image-wrapper">
+              <img v-if="company.logo" :src="company.logo" :alt="company.name" class="cert-image" />
+              <div v-else class="cert-image-placeholder">无证书图片</div>
+            </div>
+            <div class="company-name-display">
+              <p class="company-name-text">{{ company.name }}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <!-- 返回按钮 -->
-    <div class="back-link">
-      <router-link to="/">&larr; 返回证书列表</router-link>
     </div>
   </div>
 </template>
@@ -92,32 +61,86 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { CertificateDetail } from '@/types/certificate'
-import { categoryApi } from '@/api/category'
-import { enterpriseCertApi } from '@/api/enterpriseCert' // ← 新增导入
+// import { categoryApi } from '@/api/category'       // ← 注释掉真实 API
+// import { enterpriseCertApi } from '@/api/enterpriseCert'
 
 const route = useRoute()
 const cert = ref<CertificateDetail | null>(null)
 const loading = ref(false)
 const error = ref<string | null>(null)
 
+// ====== MOCK DATA ======
+function mockGetCertificateDetail(id: number) {
+  return new Promise<CertificateDetail>((resolve, reject) => {
+    setTimeout(() => {
+      if (id === 1) {
+        resolve({
+          id: 1,
+          name: '人脸识别安全评测证书',
+          keywords: ['AI 安全', '生物识别', '隐私保护'],
+          summary: '本证书依据《人工智能安全评估规范 V2.1》对人脸识别系统在活体检测、抗攻击能力、数据脱敏等方面进行综合评测，确认其达到“可信 AI”三级安全标准。',
+          contact: '张三（认证工程师）\n电话：138-0000-1234\n邮箱：zhangsan@cert.org',
+          imageUrl: '/mock-images/face-recognition.png',
+          certifiedCompanies: [
+            {
+              name: '深智科技有限公司',
+              logo: '/mock-images/face-recognition.png'
+            },
+            {
+              name: '云瞳智能',
+              logo: '/mock-images/face-recognition.png'
+            },
+             {
+              name: '深智科技有限公司',
+              logo: '/mock-images/face-recognition.png'
+            },
+            {
+              name: '云瞳智能',
+              logo: '/mock-images/face-recognition.png'
+            }, {
+              name: '深智科技有限公司',
+              logo: '/mock-images/face-recognition.png'
+            },
+            {
+              name: '云瞳智能',
+              logo: '/mock-images/face-recognition.png'
+            }, {
+              name: '深智科技有限公司',
+              logo: '/mock-images/face-recognition.png'
+            },
+            {
+              name: '云瞳智能',
+              logo: '/mock-images/face-recognition.png'
+            }
+          ]
+        })
+      } else if (id === 2) {
+        resolve({
+          id: 2,
+          name: '可信AI系统评估认证',
+          keywords: ['可解释性', '公平性', '鲁棒性'],
+          summary: '该系统通过了算法透明度、决策公平性、对抗样本鲁棒性等 12 项核心指标测试，符合国家新一代人工智能治理原则。',
+          contact: '李四\n联系电话：010-88889999',
+          imageUrl: '/mock-images/face-recognition.png',
+          certifiedCompanies: [
+            { name: '智算未来', logo: '/mock-images/face-recognition.png' },
+            { name: '数智研究院', logo: '/mock-images/face-recognition.png' }
+          ]
+        })
+      } else {
+        reject({ response: { status: 404 } })
+      }
+    }, 500) // 模拟网络延迟
+  })
+}
+
 async function loadCertificate(id: number) {
   loading.value = true
   error.value = null
   try {
-    // 1. 加载证书类别详情
-    const detail = await categoryApi.getById(id)
-    
-    // 2. 加载关联的企业证书
-    const companies = await enterpriseCertApi.getByCategoryId(id)
-    
-    // 3. 合并数据
-    cert.value = {
-      ...detail,
-      certifiedCompanies: companies.map(c => ({
-        name: c.enterpriseName,
-        logo: c.certificateImageUrl // 后端返回的是 imageUrl
-      }))
-    }
+    // 使用 Mock 数据替代 API
+    const mockData = await mockGetCertificateDetail(id)
+    cert.value = mockData
   } catch (err: any) {
     if (err.response?.status === 404) {
       error.value = '证书详情不存在'
@@ -130,7 +153,7 @@ async function loadCertificate(id: number) {
   }
 }
 
-// 👇 新增：用于模板中的重试按钮
+// 重试按钮
 function retryLoad() {
   const id = Number(route.params.id)
   if (!isNaN(id)) {
@@ -140,6 +163,7 @@ function retryLoad() {
   }
 }
 
+// 监听路由变化
 watch(
   () => route.params.id,
   (newId) => {
@@ -324,6 +348,83 @@ watch(
   text-decoration: underline;
 }
 
+/* 主体：图片 + 右侧信息（左右布局） */
+.cert-body {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 32px; /* 与摘要保持间距 */
+  flex-wrap: wrap;
+}
+
+.cert-image-wrapper {
+  flex-shrink: 0;
+  width: 240px; /* 固定图片区域宽度 */
+}
+
+.cert-image {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.cert-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cert-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.cert-keywords {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.keyword {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* 联系人信息 */
+.cert-contact {
+  line-height: 1.6;
+  color: #555;
+  white-space: pre-line; /* 保留换行 */
+}
+
+/* === 报告摘要：全宽 + 边框 === */
+.full-width-section {
+  width: 100%;
+  max-width: 100%; /* 覆盖 container 限制 */
+  margin: 0 auto 40px;
+}
+
+.summary-section h2 {
+  margin-bottom: 16px;
+  font-size: 20px;
+  color: #333;
+}
+
+.summary-content {
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fafafa;
+  line-height: 1.7;
+  color: #555;
+  white-space: pre-line; /* 保留 \n 换行 */
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .cert-body {
@@ -342,5 +443,33 @@ watch(
   .companies-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
+}
+
+/* 面包屑导航 */
+.breadcrumb {
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-separator {
+  margin: 0 6px;
+  color: #999;
+}
+
+.breadcrumb-current {
+  color: #333;
+  font-weight: 500;
 }
 </style>

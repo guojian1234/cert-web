@@ -67,18 +67,15 @@ function handleImageError(e: Event) {
   padding: 24px;
   margin-bottom: 24px;
   background-color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.2s;
+
 }
 
-.cert-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
+
 
 /* 图片区域 */
 .cert-image {
-  width: 160px; /* ← 放大到 160x160 */
-  height: 160px;
+  width: 200px; /* ← 放大到 160x160 */
+  height: 200px;
   flex-shrink: 0;
   border: 1px solid #eee;
   border-radius: 8px;
@@ -92,7 +89,8 @@ function handleImageError(e: Event) {
 .cert-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: fill;
+  display: block;
 }
 
 .image-placeholder {
@@ -100,45 +98,40 @@ function handleImageError(e: Event) {
   color: #ccc;
 }
 
-/* 文字区域 */
-.cert-info {
-  flex: 1;
-  min-width: 0;
-}
-
 .cert-info h3 {
-  margin: 0 0 12px;
-  font-size: 20px; /* ← 放大标题 */
-  font-weight: 600;
-  line-height: 1.4;
-  color: #1a1a1a;
+  margin: 0 0 16px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  
 }
 
-.cert-info a {
-  color: #1890ff;
+.cert-info h3 a {
+  color: #000000 !important; /* 纯黑 */
   text-decoration: none;
-  word-break: break-word;
+  display: inline-block; /* 避免行高问题 */
 }
 
-.cert-info a:hover {
+.cert-info h3 a:hover {
   text-decoration: underline;
+  color: #000000 !important; /* 悬停也保持黑色 */
 }
 
 /* 标签区域 */
 .tags {
-  margin: 8px 0;
+  margin: 3px 0;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
 .tag {
-  padding: 4px 12px;
-  border: 1px solid #d9d9d9;
-  border-radius: 12px;
+  padding: 4px 14px;
+  border: 1px solid #000;
+  border-radius: 8px; /* 调整此值以获得期望的圆角大小 */
   font-size: 12px;
   color: #333;
-  background-color: #f5f5f5;
+  display: inline-block; /* 确保标签不会因为内容过长而破坏布局 */
 }
 
 /* 日期显示 */
@@ -148,7 +141,7 @@ function handleImageError(e: Event) {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+  margin-top: 30px;
 }
 
 .icon {
