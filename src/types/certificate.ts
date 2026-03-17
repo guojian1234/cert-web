@@ -10,7 +10,8 @@ export interface Certificate {
   createdAt: string;      // 后端字段 (YYYY-MM)
   contactPerson: string;  // 后端字段
   reportSummary?: string; // 后端字段
-  imageUrl: string;
+  imageUrl: string;       // 后端字段
+  detailUrl: string;
 }
 
 /**

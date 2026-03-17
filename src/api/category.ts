@@ -6,11 +6,12 @@ function toCertificate(item: any): Certificate {
   return {
     id: item.id,
     name: item.name,
-    domain: item.domain,              // 👈 补全
-    createdAt: item.createdAt,      // 👈 补全
+    domain: item.domain,              
+    createdAt: item.createdAt,      
     contactPerson:item.contactPerson,
     reportSummary:item.reportSummary,
-    imageUrl: item.imageUrl, // 👈 补全
+    imageUrl: item.imageUrl, 
+    detailUrl: `/certificate/detail/${item.id}`, 
 
   }
 }
@@ -26,7 +27,8 @@ function toCertificateDetail(item: any): Omit<CertificateDetail, 'certifiedCompa
     keywords: [item.domain],
     imageUrl: item.imageUrl || '',
     summary: item.reportSummary || '',
-    contact: item.contactPerson || ''
+    contact: item.contactPerson || '',
+    detailUrl:item.detailUrl
   }
 }
 

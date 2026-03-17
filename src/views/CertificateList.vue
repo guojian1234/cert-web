@@ -195,23 +195,26 @@ onMounted(() => {
 /* 领域标签样式 */
 .domain-tabs {
   display: flex;
-  gap: 12px;
+  gap: 16px; /* 增大间距 */
   flex-wrap: wrap;
-  margin-bottom: 24px;
+  margin-bottom: 32px; /* 增大下边距 */
 }
 
 .domain-btn {
-  padding: 8px 16px;
+  padding: 12px 24px; /* 原为 8px 16px */
   border: 1px solid #d9d9d9;
   background-color: white;
-  border-radius: 6px;
+  border-radius: 8px; /* 稍微圆润 */
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px; /* 原为 14px */
+  font-weight: 500;
   transition: all 0.2s ease;
+  min-width: 80px;
+  text-align: center;
 }
 
 .domain-btn:hover:not(.active):not(.domain-title) {
-  background-color: #f0f0f0;
+  background-color: #f5f5f5;
 }
 
 /* 激活态：蓝色 */
@@ -221,7 +224,7 @@ onMounted(() => {
   border-color: #1890ff;
 }
 
-/* “研究领域” 标题样式：固定蓝色，可点击 */
+/* “研究领域” 标题样式 */
 .domain-btn.domain-title {
   background-color: #1890ff;
   color: white;

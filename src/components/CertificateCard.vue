@@ -17,18 +17,25 @@
 
     <!-- 右侧：文字信息 -->
     <div class="cert-info">
+      <!-- 证书名称 -->
       <h3>
         <a
-          :href="cert.imageUrl"
+          :href="cert.detailUrl"
           target="_blank"
           rel="noopener noreferrer"
         >
           {{ cert.name }}
         </a>
       </h3>
-      <div class="meta">
-        <span>{{ cert.contactPerson }}</span>
-        <span>{{ cert.domain }}</span>
+
+      <!-- 研究领域标签 -->
+      <div class="tags">
+        <span class="tag">{{ cert.domain }}</span>
+      </div>
+
+      <!-- 发布时间 -->
+      <div class="date">
+        <span class="icon">📅</span>
         <span>{{ cert.createdAt }}</span>
       </div>
     </div>
@@ -47,72 +54,105 @@ const props = defineProps<Props>();
 function handleImageError(e: Event) {
   const img = e.target as HTMLImageElement;
   img.style.display = 'none';
-  // 可选：替换为默认图标（这里保持隐藏，由 .image-placeholder 占位）
 }
 </script>
 
 <style scoped>
 .cert-card {
   display: flex;
-  gap: 16px;
+  gap: 24px; /* 增大间距 */
   align-items: flex-start;
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
   background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
 }
 
+.cert-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* 图片区域 */
 .cert-image {
-  width: 80px;
-  height: 80px;
+  width: 160px; /* ← 放大到 160x160 */
+  height: 160px;
   flex-shrink: 0;
   border: 1px solid #eee;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #fafafa;
 }
 
 .cert-image img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 防止图片变形 */
+  object-fit: contain;
 }
 
 .image-placeholder {
-  font-size: 24px;
+  font-size: 40px;
   color: #ccc;
 }
 
+/* 文字区域 */
 .cert-info {
   flex: 1;
-  min-width: 0; /* 允许文本溢出时换行 */
+  min-width: 0;
 }
 
 .cert-info h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 12px;
+  font-size: 20px; /* ← 放大标题 */
   font-weight: 600;
+  line-height: 1.4;
+  color: #1a1a1a;
 }
 
 .cert-info a {
   color: #1890ff;
   text-decoration: none;
-  word-break: break-word; /* 长标题自动换行 */
+  word-break: break-word;
 }
 
 .cert-info a:hover {
   text-decoration: underline;
 }
 
-.meta {
+/* 标签区域 */
+.tags {
+  margin: 8px 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  padding: 4px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 12px;
+  font-size: 12px;
+  color: #333;
+  background-color: #f5f5f5;
+}
+
+/* 日期显示 */
+.date {
   font-size: 14px;
   color: #666;
   display: flex;
-  gap: 12px;
-  flex-wrap: wrap; /* 小屏下 meta 项自动换行 */
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.icon {
+  font-size: 14px;
+  color: #999;
 }
 </style>
