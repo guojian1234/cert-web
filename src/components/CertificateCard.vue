@@ -9,6 +9,7 @@
         :alt="cert.name"
         @error="handleImageError"
         loading="lazy"
+        class="cert-img"
       />
       <div v-else class="image-placeholder">
         🖼️
@@ -18,11 +19,12 @@
     <!-- 右侧：文字信息 -->
     <div class="cert-info">
       <!-- 证书名称 -->
-      <h3>
+      <h3 class="cert-title">
         <a
           :href="cert.detailUrl"
           target="_blank"
           rel="noopener noreferrer"
+          class="cert-link"
         >
           {{ cert.name }}
         </a>
@@ -60,92 +62,155 @@ function handleImageError(e: Event) {
 <style scoped>
 .cert-card {
   display: flex;
-  gap: 24px; /* 增大间距 */
-  align-items: flex-start;
+  flex-direction: column;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 24px;
-  margin-bottom: 24px;
+  border-radius: 16px;
+  padding: 20px;
   background-color: #fff;
-
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
 }
 
-
+.cert-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: #1890ff;
+}
 
 /* 图片区域 */
 .cert-image {
-  width: 200px; /* ← 放大到 160x160 */
-  height: 200px;
-  flex-shrink: 0;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  width: 100%;
+  height: 320px;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
   background-color: #fafafa;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
 }
 
-.cert-image img {
+.cert-card:hover .cert-image {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cert-img {
   width: 100%;
   height: 100%;
   object-fit: fill;
   display: block;
+  transition: transform 0.3s ease;
 }
 
 .image-placeholder {
-  font-size: 40px;
+  font-size: 48px;
   color: #ccc;
+  transition: color 0.3s ease;
 }
 
-.cert-info h3 {
-  margin: 0 0 16px;
-  font-size: 18px;
+.cert-card:hover .image-placeholder {
+  color: #1890ff;
+}
+
+/* 证书信息 */
+.cert-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cert-title {
+  margin: 0 0 8px;
+  font-size: 15px;
   font-weight: 700;
-  line-height: 1.25;
-  
+  line-height: 1.3;
+  color: #333;
+  transition: color 0.3s ease;
 }
 
-.cert-info h3 a {
-  color: #000000 !important; /* 纯黑 */
+.cert-card:hover .cert-title {
+  color: #1890ff;
+}
+
+.cert-link {
+  color: #333;
   text-decoration: none;
-  display: inline-block; /* 避免行高问题 */
+  display: block;
+  transition: all 0.3s ease;
 }
 
-.cert-info h3 a:hover {
-  text-decoration: underline;
-  color: #000000 !important; /* 悬停也保持黑色 */
+.cert-link:hover {
+  color: #1890ff;
+  text-decoration: none;
 }
 
 /* 标签区域 */
 .tags {
-  margin: 3px 0;
+  margin: 4px 0 8px;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .tag {
-  padding: 4px 14px;
-  border: 1px solid #000;
-  border-radius: 8px; /* 调整此值以获得期望的圆角大小 */
-  font-size: 12px;
-  color: #333;
-  display: inline-block; /* 确保标签不会因为内容过长而破坏布局 */
+  padding: 3px 10px;
+  border: 1px solid #1890ff;
+  border-radius: 12px;
+  font-size: 11px;
+  color: #1890ff;
+  background-color: rgba(24, 144, 255, 0.05);
+  display: inline-block;
+  transition: all 0.3s ease;
+}
+
+.cert-card:hover .tag {
+  background-color: rgba(24, 144, 255, 0.1);
+  border-color: #40a9ff;
 }
 
 /* 日期显示 */
 .date {
-  font-size: 14px;
+  font-size: 12px;
   color: #666;
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 30px;
+  gap: 4px;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.cert-card:hover .date {
+  color: #999;
 }
 
 .icon {
-  font-size: 14px;
+  font-size: 12px;
   color: #999;
+}
+
+
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .cert-card {
+    padding: 16px;
+  }
+  
+  .cert-image {
+    height: 160px;
+  }
+  
+  .cert-title {
+    font-size: 15px;
+  }
+  
+  .detail-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
 }
 </style>
